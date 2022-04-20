@@ -32,6 +32,7 @@ public class FrameMain extends JFrame {
     private JTextField матрицаОбратнаяКМатрицеTextField;
     private JTextField матрицаСвободныхЧленовTextField;
     private JButton check1Button;
+    private JButton check2Button;
 
     private JFileChooser fileChooserOpen;
     private JFileChooser fileChooserSave;
@@ -175,7 +176,25 @@ public class FrameMain extends JFrame {
 
                     //JTableUtils.writeArrayToJTable(outputA, dets);
                     JTableUtils.writeArrayToJTable(outputB, b);
-                    JTableUtils.writeArrayToJTable(tableOutput, rez);
+                    JTableUtils.writeArrayToJTable(outputA, rez);
+                } catch (Exception e) {
+                    SwingUtils.showErrorMessageBox(e);
+                }
+            }
+        });
+        check2Button.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                try {
+                    double[][] matrix = JTableUtils.readDoubleMatrixFromJTable(tableInput);
+                    double[][] a = Task.defineA(matrix);
+                    double[][] b = Task.defineB(matrix);
+
+                    double[][] rez = Gauss.gauss(matrix);
+
+                    //JTableUtils.writeArrayToJTable(outputA, dets);
+                    JTableUtils.writeArrayToJTable(outputB, b);
+                    JTableUtils.writeArrayToJTable(outputA, rez);
                 } catch (Exception e) {
                     SwingUtils.showErrorMessageBox(e);
                 }
@@ -204,9 +223,9 @@ public class FrameMain extends JFrame {
 
                     double[][] rez = Task.rezCount(a, b);
 
-                    JTableUtils.writeArrayToJTable(outputA, a);
+                    //JTableUtils.writeArrayToJTable(outputA, a);
                     JTableUtils.writeArrayToJTable(outputB, b);
-                    JTableUtils.writeArrayToJTable(tableOutput, rez);
+                    JTableUtils.writeArrayToJTable(outputA, rez);
                 } catch (Exception e) {
                     SwingUtils.showErrorMessageBox(e);
                 }
