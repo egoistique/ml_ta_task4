@@ -14,6 +14,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.Arrays;
+import java.util.Scanner;
 
 
 public class FrameMain extends JFrame {
@@ -33,6 +35,9 @@ public class FrameMain extends JFrame {
     private JTextField матрицаСвободныхЧленовTextField;
     private JButton check1Button;
     private JButton check2Button;
+    private JButton buttonEngine;
+    private JTextField Values;
+    private JTextField Vectors;
 
     private JFileChooser fileChooserOpen;
     private JFileChooser fileChooserSave;
@@ -232,7 +237,168 @@ public class FrameMain extends JFrame {
             }
         });
 
+        buttonEngine.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                try {
+                    double[][] matrix = JTableUtils.readDoubleMatrixFromJTable(tableInput);
 
+                    int n = matrix.length;
+
+
+                    double[][] V, H, R, EV;
+                    double[] d, e, ort;
+                    double det;
+
+                    Scanner scanner = new Scanner(System.in);
+
+
+
+                    d = new double[n];
+                    e = new double[n];
+                    ort = new double[n];
+                    V = new double[n][n];
+                    H = new double[n][n];
+                    R = new double[n][n];
+
+
+                    //print matrix
+                    System.out.println("Matrix: ");
+                    for (int i = 0; i < matrix.length; i++) {
+                        for (int j = 0; j < matrix[0].length; j++) {
+                            System.out.print(matrix[i][j] + " ");
+                        }
+                        System.out.print("\n");
+                    }
+                    System.out.print("\n");
+
+                    //Prints rref of matrix
+                    R = EigenvalueCalculator.rref(matrix);
+                    System.out.println("Row reduced matrix: ");
+                    for (int i = 0; i < R.length; i++) {
+                        for (int j = 0; j < R[0].length; j++) {
+                            System.out.print(R[i][j] + " ");
+                        }
+                        System.out.println("");
+                    }
+                    System.out.print("\n");
+
+                    // calculate determinant
+                    det = EigenvalueCalculator.findDeterminant(matrix);
+                    System.out.println("Determinant: " + det);
+
+                    //calculate eigenvalues
+                    if (EigenvalueCalculator.isSymmetric(matrix)) {
+                        for (int i = 0; i < n; i++) {
+                            for (int j = 0; j < n; j++) {
+                                V[i][j] = matrix[i][j];
+                            }
+                        }
+
+                        // Tridiagonalize.
+                        EigenvalueCalculator.tred2(n, d, e, V);
+
+                        // Diagonalize.
+                        EigenvalueCalculator.tql2(n, d, e, V);
+                    } else {
+                        H = new double[n][n];
+                        ort = new double[n];
+
+                        for (int j = 0; j < n; j++) {
+                            for (int i = 0; i < n; i++) {
+                                H[i][j] = matrix[i][j];
+                            }
+                        }
+
+                        // Reduce to Hessenberg form.
+                        EigenvalueCalculator.orthes(n, d, e, V, H, ort);
+
+                        // Reduce Hessenberg to real Schur form.
+                        EigenvalueCalculator.hqr2(n, d, e, V, H, ort);
+                    }
+
+
+                    //round eigen values
+                    for (int i = 0; i < d.length; i++) {
+                        d[i] = (double) Math.round((d[i] * 1000000)) / 1000000;
+                    }
+
+                    String values = "Real eigenvalues: [";
+                    //print eigenvalues
+                    System.out.print("Real eigenvalues: [");
+                    Arrays.sort(d);
+                    for (int i = 0; i < d.length; i++) {
+                        if (i != 0) {
+                            values+=", ";
+                            System.out.print(", ");
+                        }
+                        values+=d[i];
+                        System.out.print(d[i]);
+                    }
+                    values+="]";
+                    System.out.println("]");
+                    System.out.print("Complex eigenvalues: [");
+                    Arrays.sort(e);
+                    for (int i = 0; i < e.length; i++) {
+                        if (i != 0) {
+                            System.out.print(", ");
+                        }
+                        System.out.print(e[i]);
+                    }
+                    System.out.println("]\n");
+
+
+                    String vectors = "Eigenvectors: ";
+
+
+
+
+
+
+                    for(int k = 0; k < d.length; k++) {
+                        String ans ="Для л = " + d[k] + "    ";
+                        double[][] matrix1 = JTableUtils.readDoubleMatrixFromJTable(tableInput);
+                        double[][] matrix2 = new double[n][n + 1];
+                        for (int i = 0; i < n; i++) {
+                            matrix1[i][i] = matrix1[i][i] - d[k];
+                        }
+
+                        for (int i = 0; i < n; i++) {
+                            for(int j = 0; j < n; j++) {
+                                matrix2[i][j] = matrix1[i][j];
+                            }
+                        }
+
+                        double[][] rez = Gauss.gauss(matrix2);
+
+                        for(int j = 0; j < n; j++) {
+                            ans += (rez[j][0] + " ");
+                        }
+                        vectors +=(ans + "        ");
+                        //JTableUtils.writeArrayToJTable(outputA, rez);
+                    }
+
+
+
+                    Vectors.setText(vectors);
+                    Values.setText(values);
+
+
+
+
+
+
+
+
+
+                    //JTableUtils.writeArrayToJTable(outputA, a);
+                   // JTableUtils.writeArrayToJTable(outputB, b);
+                   // JTableUtils.writeArrayToJTable(outputA, rez);
+                } catch (Exception e) {
+                    SwingUtils.showErrorMessageBox(e);
+                }
+            }
+        });
     }
 
 
